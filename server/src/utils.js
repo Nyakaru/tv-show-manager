@@ -1,22 +1,64 @@
 //@ts-check
-import * as jwt from "jsonwebtoken"
-const APP_SECRET = 'qwern-latadasha'
+import * as jwt from "jsonwebtoken";
 
-function getUserId(context) {
-    const Authorization = context.request.get('Authorization')
-    if (Authorization) {
-        const token = Authorization.replace(newFunction(), '')
-        const  userId  = jwt.verify( token, APP_SECRET)
-        return userId 
+export const APP_SECRET = "qwern-latadasha";
+export const BASE_URL = "http://api.tvmaze.com";
+
+export const pagination = ({
+  after: cursor,
+  pageSize,
+  results,
+  getCursor = () => null,
+}) => {
+  if (pageSize < 1) return [];
+
+  if (!cursor) return results.slice(0, pageSize);
+  const cursorIndex = results.findIndex((item) => {
+    let itemCursor = item.cursor ? item.cursor : getCursor(item);
+
+    return itemCursor ? cursor === itemCursor : false;
+  });
+
+  return cursorIndex >= 0
+    ? cursorIndex === results.length - 1
+      ? []
+      : results.slice(
+          cursorIndex + 1,
+          Math.min(results.length, cursorIndex + 1 + pageSize)
+        )
+    : results.slice(0, pageSize);
+};
+
+export const WatchFragment = /* GraphQL */ `
+  fragment WatchedWithDetails on Watched {
+    name
+    id
+    summary
+    url
+    image
+    rating
+    user {
+      id
+      name
+      email
     }
-    throw new Error ('Not authenticated')
+    favorite
+    comment
+  }
+`;
 
-    function newFunction() {
-        return 'Bearer'
+export const ScheduleFragment = /* GraphQL */ `
+  fragment ScheduleWithDetails on Schedule {
+    name
+    id
+    summary
+    url
+    image
+    rating
+    user {
+      id
+      name
+      email
     }
-}
-
-module.exports = {
-    APP_SECRET,
-    getUserId
-}
+  }
+`;

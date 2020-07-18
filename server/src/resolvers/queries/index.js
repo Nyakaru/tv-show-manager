@@ -1,6 +1,10 @@
 //@ts-check
-import UserQueries from "./user"
+import ScheduleQueries from "./schedule";
+import ShowQueries from "./shows";
+import WatchQueries from "./watch";
 
 export default {
-    ...UserQueries
-}
+  ...ScheduleQueries,
+  ...ShowQueries,
+  ...WatchQueries,
+};
