@@ -6,12 +6,20 @@ var typeDefs = require("./prisma-schema").typeDefs;
 var models = [
   {
     name: "User",
-    embedded: false
-  }
+    embedded: false,
+  },
+  {
+    name: "Schedule",
+    embedded: false,
+  },
+  {
+    name: "Watched",
+    embedded: false,
+  },
 ];
 exports.Prisma = prisma_lib_1.makePrismaClientClass({
   typeDefs,
   models,
-  endpoint: `https://eu1.prisma.sh/kinara-moses-f425e2/hacker/dev`
+  endpoint: `https://eu1.prisma.sh/kinara-moses-f425e2/hacker/dev`,
 });
 exports.prisma = new exports.Prisma();

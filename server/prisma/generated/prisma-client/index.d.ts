@@ -6,7 +6,7 @@ import { DocumentNode } from "graphql";
 import {
   makePrismaClientClass,
   BaseClientOptions,
-  Model
+  Model,
 } from "prisma-client-lib";
 import { typeDefs } from "./prisma-schema";
 
@@ -16,7 +16,9 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> &
 export type Maybe<T> = T | undefined | null;
 
 export interface Exists {
+  schedule: (where?: ScheduleWhereInput) => Promise<boolean>;
   user: (where?: UserWhereInput) => Promise<boolean>;
+  watched: (where?: WatchedWhereInput) => Promise<boolean>;
 }
 
 export interface Node {}
@@ -38,6 +40,25 @@ export interface Prisma {
    * Queries
    */
 
+  schedule: (where: ScheduleWhereUniqueInput) => ScheduleNullablePromise;
+  schedules: (args?: {
+    where?: ScheduleWhereInput;
+    orderBy?: ScheduleOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => FragmentableArray<Schedule>;
+  schedulesConnection: (args?: {
+    where?: ScheduleWhereInput;
+    orderBy?: ScheduleOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => ScheduleConnectionPromise;
   user: (where: UserWhereUniqueInput) => UserNullablePromise;
   users: (args?: {
     where?: UserWhereInput;
@@ -57,12 +78,47 @@ export interface Prisma {
     first?: Int;
     last?: Int;
   }) => UserConnectionPromise;
+  watched: (where: WatchedWhereUniqueInput) => WatchedNullablePromise;
+  watcheds: (args?: {
+    where?: WatchedWhereInput;
+    orderBy?: WatchedOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => FragmentableArray<Watched>;
+  watchedsConnection: (args?: {
+    where?: WatchedWhereInput;
+    orderBy?: WatchedOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => WatchedConnectionPromise;
   node: (args: { id: ID_Output }) => Node;
 
   /**
    * Mutations
    */
 
+  createSchedule: (data: ScheduleCreateInput) => SchedulePromise;
+  updateSchedule: (args: {
+    data: ScheduleUpdateInput;
+    where: ScheduleWhereUniqueInput;
+  }) => SchedulePromise;
+  updateManySchedules: (args: {
+    data: ScheduleUpdateManyMutationInput;
+    where?: ScheduleWhereInput;
+  }) => BatchPayloadPromise;
+  upsertSchedule: (args: {
+    where: ScheduleWhereUniqueInput;
+    create: ScheduleCreateInput;
+    update: ScheduleUpdateInput;
+  }) => SchedulePromise;
+  deleteSchedule: (where: ScheduleWhereUniqueInput) => SchedulePromise;
+  deleteManySchedules: (where?: ScheduleWhereInput) => BatchPayloadPromise;
   createUser: (data: UserCreateInput) => UserPromise;
   updateUser: (args: {
     data: UserUpdateInput;
@@ -79,6 +135,22 @@ export interface Prisma {
   }) => UserPromise;
   deleteUser: (where: UserWhereUniqueInput) => UserPromise;
   deleteManyUsers: (where?: UserWhereInput) => BatchPayloadPromise;
+  createWatched: (data: WatchedCreateInput) => WatchedPromise;
+  updateWatched: (args: {
+    data: WatchedUpdateInput;
+    where: WatchedWhereUniqueInput;
+  }) => WatchedPromise;
+  updateManyWatcheds: (args: {
+    data: WatchedUpdateManyMutationInput;
+    where?: WatchedWhereInput;
+  }) => BatchPayloadPromise;
+  upsertWatched: (args: {
+    where: WatchedWhereUniqueInput;
+    create: WatchedCreateInput;
+    update: WatchedUpdateInput;
+  }) => WatchedPromise;
+  deleteWatched: (where: WatchedWhereUniqueInput) => WatchedPromise;
+  deleteManyWatcheds: (where?: WatchedWhereInput) => BatchPayloadPromise;
 
   /**
    * Subscriptions
@@ -88,9 +160,15 @@ export interface Prisma {
 }
 
 export interface Subscription {
+  schedule: (
+    where?: ScheduleSubscriptionWhereInput
+  ) => ScheduleSubscriptionPayloadSubscription;
   user: (
     where?: UserSubscriptionWhereInput
   ) => UserSubscriptionPayloadSubscription;
+  watched: (
+    where?: WatchedSubscriptionWhereInput
+  ) => WatchedSubscriptionPayloadSubscription;
 }
 
 export interface ClientConstructor<T> {
@@ -100,6 +178,38 @@ export interface ClientConstructor<T> {
 /**
  * Types
  */
+
+export type ScheduleOrderByInput =
+  | "id_ASC"
+  | "id_DESC"
+  | "name_ASC"
+  | "name_DESC"
+  | "summary_ASC"
+  | "summary_DESC"
+  | "url_ASC"
+  | "url_DESC"
+  | "image_ASC"
+  | "image_DESC"
+  | "rating_ASC"
+  | "rating_DESC";
+
+export type WatchedOrderByInput =
+  | "id_ASC"
+  | "id_DESC"
+  | "name_ASC"
+  | "name_DESC"
+  | "summary_ASC"
+  | "summary_DESC"
+  | "url_ASC"
+  | "url_DESC"
+  | "image_ASC"
+  | "image_DESC"
+  | "rating_ASC"
+  | "rating_DESC"
+  | "favorite_ASC"
+  | "favorite_DESC"
+  | "comment_ASC"
+  | "comment_DESC";
 
 export type UserOrderByInput =
   | "id_ASC"
@@ -113,10 +223,94 @@ export type UserOrderByInput =
 
 export type MutationType = "CREATED" | "UPDATED" | "DELETED";
 
-export type UserWhereUniqueInput = AtLeastOne<{
+export type ScheduleWhereUniqueInput = AtLeastOne<{
   id: Maybe<ID_Input>;
-  email?: Maybe<String>;
 }>;
+
+export interface ScheduleWhereInput {
+  id?: Maybe<ID_Input>;
+  id_not?: Maybe<ID_Input>;
+  id_in?: Maybe<ID_Input[] | ID_Input>;
+  id_not_in?: Maybe<ID_Input[] | ID_Input>;
+  id_lt?: Maybe<ID_Input>;
+  id_lte?: Maybe<ID_Input>;
+  id_gt?: Maybe<ID_Input>;
+  id_gte?: Maybe<ID_Input>;
+  id_contains?: Maybe<ID_Input>;
+  id_not_contains?: Maybe<ID_Input>;
+  id_starts_with?: Maybe<ID_Input>;
+  id_not_starts_with?: Maybe<ID_Input>;
+  id_ends_with?: Maybe<ID_Input>;
+  id_not_ends_with?: Maybe<ID_Input>;
+  name?: Maybe<String>;
+  name_not?: Maybe<String>;
+  name_in?: Maybe<String[] | String>;
+  name_not_in?: Maybe<String[] | String>;
+  name_lt?: Maybe<String>;
+  name_lte?: Maybe<String>;
+  name_gt?: Maybe<String>;
+  name_gte?: Maybe<String>;
+  name_contains?: Maybe<String>;
+  name_not_contains?: Maybe<String>;
+  name_starts_with?: Maybe<String>;
+  name_not_starts_with?: Maybe<String>;
+  name_ends_with?: Maybe<String>;
+  name_not_ends_with?: Maybe<String>;
+  summary?: Maybe<String>;
+  summary_not?: Maybe<String>;
+  summary_in?: Maybe<String[] | String>;
+  summary_not_in?: Maybe<String[] | String>;
+  summary_lt?: Maybe<String>;
+  summary_lte?: Maybe<String>;
+  summary_gt?: Maybe<String>;
+  summary_gte?: Maybe<String>;
+  summary_contains?: Maybe<String>;
+  summary_not_contains?: Maybe<String>;
+  summary_starts_with?: Maybe<String>;
+  summary_not_starts_with?: Maybe<String>;
+  summary_ends_with?: Maybe<String>;
+  summary_not_ends_with?: Maybe<String>;
+  url?: Maybe<String>;
+  url_not?: Maybe<String>;
+  url_in?: Maybe<String[] | String>;
+  url_not_in?: Maybe<String[] | String>;
+  url_lt?: Maybe<String>;
+  url_lte?: Maybe<String>;
+  url_gt?: Maybe<String>;
+  url_gte?: Maybe<String>;
+  url_contains?: Maybe<String>;
+  url_not_contains?: Maybe<String>;
+  url_starts_with?: Maybe<String>;
+  url_not_starts_with?: Maybe<String>;
+  url_ends_with?: Maybe<String>;
+  url_not_ends_with?: Maybe<String>;
+  image?: Maybe<String>;
+  image_not?: Maybe<String>;
+  image_in?: Maybe<String[] | String>;
+  image_not_in?: Maybe<String[] | String>;
+  image_lt?: Maybe<String>;
+  image_lte?: Maybe<String>;
+  image_gt?: Maybe<String>;
+  image_gte?: Maybe<String>;
+  image_contains?: Maybe<String>;
+  image_not_contains?: Maybe<String>;
+  image_starts_with?: Maybe<String>;
+  image_not_starts_with?: Maybe<String>;
+  image_ends_with?: Maybe<String>;
+  image_not_ends_with?: Maybe<String>;
+  rating?: Maybe<Float>;
+  rating_not?: Maybe<Float>;
+  rating_in?: Maybe<Float[] | Float>;
+  rating_not_in?: Maybe<Float[] | Float>;
+  rating_lt?: Maybe<Float>;
+  rating_lte?: Maybe<Float>;
+  rating_gt?: Maybe<Float>;
+  rating_gte?: Maybe<Float>;
+  user?: Maybe<UserWhereInput>;
+  AND?: Maybe<ScheduleWhereInput[] | ScheduleWhereInput>;
+  OR?: Maybe<ScheduleWhereInput[] | ScheduleWhereInput>;
+  NOT?: Maybe<ScheduleWhereInput[] | ScheduleWhereInput>;
+}
 
 export interface UserWhereInput {
   id?: Maybe<ID_Input>;
@@ -175,9 +369,363 @@ export interface UserWhereInput {
   password_not_starts_with?: Maybe<String>;
   password_ends_with?: Maybe<String>;
   password_not_ends_with?: Maybe<String>;
+  schedule_every?: Maybe<ScheduleWhereInput>;
+  schedule_some?: Maybe<ScheduleWhereInput>;
+  schedule_none?: Maybe<ScheduleWhereInput>;
+  watched_every?: Maybe<WatchedWhereInput>;
+  watched_some?: Maybe<WatchedWhereInput>;
+  watched_none?: Maybe<WatchedWhereInput>;
   AND?: Maybe<UserWhereInput[] | UserWhereInput>;
   OR?: Maybe<UserWhereInput[] | UserWhereInput>;
   NOT?: Maybe<UserWhereInput[] | UserWhereInput>;
+}
+
+export interface WatchedWhereInput {
+  id?: Maybe<ID_Input>;
+  id_not?: Maybe<ID_Input>;
+  id_in?: Maybe<ID_Input[] | ID_Input>;
+  id_not_in?: Maybe<ID_Input[] | ID_Input>;
+  id_lt?: Maybe<ID_Input>;
+  id_lte?: Maybe<ID_Input>;
+  id_gt?: Maybe<ID_Input>;
+  id_gte?: Maybe<ID_Input>;
+  id_contains?: Maybe<ID_Input>;
+  id_not_contains?: Maybe<ID_Input>;
+  id_starts_with?: Maybe<ID_Input>;
+  id_not_starts_with?: Maybe<ID_Input>;
+  id_ends_with?: Maybe<ID_Input>;
+  id_not_ends_with?: Maybe<ID_Input>;
+  name?: Maybe<String>;
+  name_not?: Maybe<String>;
+  name_in?: Maybe<String[] | String>;
+  name_not_in?: Maybe<String[] | String>;
+  name_lt?: Maybe<String>;
+  name_lte?: Maybe<String>;
+  name_gt?: Maybe<String>;
+  name_gte?: Maybe<String>;
+  name_contains?: Maybe<String>;
+  name_not_contains?: Maybe<String>;
+  name_starts_with?: Maybe<String>;
+  name_not_starts_with?: Maybe<String>;
+  name_ends_with?: Maybe<String>;
+  name_not_ends_with?: Maybe<String>;
+  summary?: Maybe<String>;
+  summary_not?: Maybe<String>;
+  summary_in?: Maybe<String[] | String>;
+  summary_not_in?: Maybe<String[] | String>;
+  summary_lt?: Maybe<String>;
+  summary_lte?: Maybe<String>;
+  summary_gt?: Maybe<String>;
+  summary_gte?: Maybe<String>;
+  summary_contains?: Maybe<String>;
+  summary_not_contains?: Maybe<String>;
+  summary_starts_with?: Maybe<String>;
+  summary_not_starts_with?: Maybe<String>;
+  summary_ends_with?: Maybe<String>;
+  summary_not_ends_with?: Maybe<String>;
+  url?: Maybe<String>;
+  url_not?: Maybe<String>;
+  url_in?: Maybe<String[] | String>;
+  url_not_in?: Maybe<String[] | String>;
+  url_lt?: Maybe<String>;
+  url_lte?: Maybe<String>;
+  url_gt?: Maybe<String>;
+  url_gte?: Maybe<String>;
+  url_contains?: Maybe<String>;
+  url_not_contains?: Maybe<String>;
+  url_starts_with?: Maybe<String>;
+  url_not_starts_with?: Maybe<String>;
+  url_ends_with?: Maybe<String>;
+  url_not_ends_with?: Maybe<String>;
+  image?: Maybe<String>;
+  image_not?: Maybe<String>;
+  image_in?: Maybe<String[] | String>;
+  image_not_in?: Maybe<String[] | String>;
+  image_lt?: Maybe<String>;
+  image_lte?: Maybe<String>;
+  image_gt?: Maybe<String>;
+  image_gte?: Maybe<String>;
+  image_contains?: Maybe<String>;
+  image_not_contains?: Maybe<String>;
+  image_starts_with?: Maybe<String>;
+  image_not_starts_with?: Maybe<String>;
+  image_ends_with?: Maybe<String>;
+  image_not_ends_with?: Maybe<String>;
+  rating?: Maybe<Float>;
+  rating_not?: Maybe<Float>;
+  rating_in?: Maybe<Float[] | Float>;
+  rating_not_in?: Maybe<Float[] | Float>;
+  rating_lt?: Maybe<Float>;
+  rating_lte?: Maybe<Float>;
+  rating_gt?: Maybe<Float>;
+  rating_gte?: Maybe<Float>;
+  user?: Maybe<UserWhereInput>;
+  favorite?: Maybe<Boolean>;
+  favorite_not?: Maybe<Boolean>;
+  comment?: Maybe<String>;
+  comment_not?: Maybe<String>;
+  comment_in?: Maybe<String[] | String>;
+  comment_not_in?: Maybe<String[] | String>;
+  comment_lt?: Maybe<String>;
+  comment_lte?: Maybe<String>;
+  comment_gt?: Maybe<String>;
+  comment_gte?: Maybe<String>;
+  comment_contains?: Maybe<String>;
+  comment_not_contains?: Maybe<String>;
+  comment_starts_with?: Maybe<String>;
+  comment_not_starts_with?: Maybe<String>;
+  comment_ends_with?: Maybe<String>;
+  comment_not_ends_with?: Maybe<String>;
+  AND?: Maybe<WatchedWhereInput[] | WatchedWhereInput>;
+  OR?: Maybe<WatchedWhereInput[] | WatchedWhereInput>;
+  NOT?: Maybe<WatchedWhereInput[] | WatchedWhereInput>;
+}
+
+export type UserWhereUniqueInput = AtLeastOne<{
+  id: Maybe<ID_Input>;
+  email?: Maybe<String>;
+}>;
+
+export type WatchedWhereUniqueInput = AtLeastOne<{
+  id: Maybe<ID_Input>;
+}>;
+
+export interface ScheduleCreateInput {
+  id?: Maybe<ID_Input>;
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
+  user?: Maybe<UserCreateOneWithoutScheduleInput>;
+}
+
+export interface UserCreateOneWithoutScheduleInput {
+  create?: Maybe<UserCreateWithoutScheduleInput>;
+  connect?: Maybe<UserWhereUniqueInput>;
+}
+
+export interface UserCreateWithoutScheduleInput {
+  id?: Maybe<ID_Input>;
+  name: String;
+  email: String;
+  password: String;
+  watched?: Maybe<WatchedCreateManyWithoutUserInput>;
+}
+
+export interface WatchedCreateManyWithoutUserInput {
+  create?: Maybe<
+    WatchedCreateWithoutUserInput[] | WatchedCreateWithoutUserInput
+  >;
+  connect?: Maybe<WatchedWhereUniqueInput[] | WatchedWhereUniqueInput>;
+}
+
+export interface WatchedCreateWithoutUserInput {
+  id?: Maybe<ID_Input>;
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
+  favorite?: Maybe<Boolean>;
+  comment?: Maybe<String>;
+}
+
+export interface ScheduleUpdateInput {
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
+  user?: Maybe<UserUpdateOneWithoutScheduleInput>;
+}
+
+export interface UserUpdateOneWithoutScheduleInput {
+  create?: Maybe<UserCreateWithoutScheduleInput>;
+  update?: Maybe<UserUpdateWithoutScheduleDataInput>;
+  upsert?: Maybe<UserUpsertWithoutScheduleInput>;
+  delete?: Maybe<Boolean>;
+  disconnect?: Maybe<Boolean>;
+  connect?: Maybe<UserWhereUniqueInput>;
+}
+
+export interface UserUpdateWithoutScheduleDataInput {
+  name?: Maybe<String>;
+  email?: Maybe<String>;
+  password?: Maybe<String>;
+  watched?: Maybe<WatchedUpdateManyWithoutUserInput>;
+}
+
+export interface WatchedUpdateManyWithoutUserInput {
+  create?: Maybe<
+    WatchedCreateWithoutUserInput[] | WatchedCreateWithoutUserInput
+  >;
+  delete?: Maybe<WatchedWhereUniqueInput[] | WatchedWhereUniqueInput>;
+  connect?: Maybe<WatchedWhereUniqueInput[] | WatchedWhereUniqueInput>;
+  set?: Maybe<WatchedWhereUniqueInput[] | WatchedWhereUniqueInput>;
+  disconnect?: Maybe<WatchedWhereUniqueInput[] | WatchedWhereUniqueInput>;
+  update?: Maybe<
+    | WatchedUpdateWithWhereUniqueWithoutUserInput[]
+    | WatchedUpdateWithWhereUniqueWithoutUserInput
+  >;
+  upsert?: Maybe<
+    | WatchedUpsertWithWhereUniqueWithoutUserInput[]
+    | WatchedUpsertWithWhereUniqueWithoutUserInput
+  >;
+  deleteMany?: Maybe<WatchedScalarWhereInput[] | WatchedScalarWhereInput>;
+  updateMany?: Maybe<
+    | WatchedUpdateManyWithWhereNestedInput[]
+    | WatchedUpdateManyWithWhereNestedInput
+  >;
+}
+
+export interface WatchedUpdateWithWhereUniqueWithoutUserInput {
+  where: WatchedWhereUniqueInput;
+  data: WatchedUpdateWithoutUserDataInput;
+}
+
+export interface WatchedUpdateWithoutUserDataInput {
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
+  favorite?: Maybe<Boolean>;
+  comment?: Maybe<String>;
+}
+
+export interface WatchedUpsertWithWhereUniqueWithoutUserInput {
+  where: WatchedWhereUniqueInput;
+  update: WatchedUpdateWithoutUserDataInput;
+  create: WatchedCreateWithoutUserInput;
+}
+
+export interface WatchedScalarWhereInput {
+  id?: Maybe<ID_Input>;
+  id_not?: Maybe<ID_Input>;
+  id_in?: Maybe<ID_Input[] | ID_Input>;
+  id_not_in?: Maybe<ID_Input[] | ID_Input>;
+  id_lt?: Maybe<ID_Input>;
+  id_lte?: Maybe<ID_Input>;
+  id_gt?: Maybe<ID_Input>;
+  id_gte?: Maybe<ID_Input>;
+  id_contains?: Maybe<ID_Input>;
+  id_not_contains?: Maybe<ID_Input>;
+  id_starts_with?: Maybe<ID_Input>;
+  id_not_starts_with?: Maybe<ID_Input>;
+  id_ends_with?: Maybe<ID_Input>;
+  id_not_ends_with?: Maybe<ID_Input>;
+  name?: Maybe<String>;
+  name_not?: Maybe<String>;
+  name_in?: Maybe<String[] | String>;
+  name_not_in?: Maybe<String[] | String>;
+  name_lt?: Maybe<String>;
+  name_lte?: Maybe<String>;
+  name_gt?: Maybe<String>;
+  name_gte?: Maybe<String>;
+  name_contains?: Maybe<String>;
+  name_not_contains?: Maybe<String>;
+  name_starts_with?: Maybe<String>;
+  name_not_starts_with?: Maybe<String>;
+  name_ends_with?: Maybe<String>;
+  name_not_ends_with?: Maybe<String>;
+  summary?: Maybe<String>;
+  summary_not?: Maybe<String>;
+  summary_in?: Maybe<String[] | String>;
+  summary_not_in?: Maybe<String[] | String>;
+  summary_lt?: Maybe<String>;
+  summary_lte?: Maybe<String>;
+  summary_gt?: Maybe<String>;
+  summary_gte?: Maybe<String>;
+  summary_contains?: Maybe<String>;
+  summary_not_contains?: Maybe<String>;
+  summary_starts_with?: Maybe<String>;
+  summary_not_starts_with?: Maybe<String>;
+  summary_ends_with?: Maybe<String>;
+  summary_not_ends_with?: Maybe<String>;
+  url?: Maybe<String>;
+  url_not?: Maybe<String>;
+  url_in?: Maybe<String[] | String>;
+  url_not_in?: Maybe<String[] | String>;
+  url_lt?: Maybe<String>;
+  url_lte?: Maybe<String>;
+  url_gt?: Maybe<String>;
+  url_gte?: Maybe<String>;
+  url_contains?: Maybe<String>;
+  url_not_contains?: Maybe<String>;
+  url_starts_with?: Maybe<String>;
+  url_not_starts_with?: Maybe<String>;
+  url_ends_with?: Maybe<String>;
+  url_not_ends_with?: Maybe<String>;
+  image?: Maybe<String>;
+  image_not?: Maybe<String>;
+  image_in?: Maybe<String[] | String>;
+  image_not_in?: Maybe<String[] | String>;
+  image_lt?: Maybe<String>;
+  image_lte?: Maybe<String>;
+  image_gt?: Maybe<String>;
+  image_gte?: Maybe<String>;
+  image_contains?: Maybe<String>;
+  image_not_contains?: Maybe<String>;
+  image_starts_with?: Maybe<String>;
+  image_not_starts_with?: Maybe<String>;
+  image_ends_with?: Maybe<String>;
+  image_not_ends_with?: Maybe<String>;
+  rating?: Maybe<Float>;
+  rating_not?: Maybe<Float>;
+  rating_in?: Maybe<Float[] | Float>;
+  rating_not_in?: Maybe<Float[] | Float>;
+  rating_lt?: Maybe<Float>;
+  rating_lte?: Maybe<Float>;
+  rating_gt?: Maybe<Float>;
+  rating_gte?: Maybe<Float>;
+  favorite?: Maybe<Boolean>;
+  favorite_not?: Maybe<Boolean>;
+  comment?: Maybe<String>;
+  comment_not?: Maybe<String>;
+  comment_in?: Maybe<String[] | String>;
+  comment_not_in?: Maybe<String[] | String>;
+  comment_lt?: Maybe<String>;
+  comment_lte?: Maybe<String>;
+  comment_gt?: Maybe<String>;
+  comment_gte?: Maybe<String>;
+  comment_contains?: Maybe<String>;
+  comment_not_contains?: Maybe<String>;
+  comment_starts_with?: Maybe<String>;
+  comment_not_starts_with?: Maybe<String>;
+  comment_ends_with?: Maybe<String>;
+  comment_not_ends_with?: Maybe<String>;
+  AND?: Maybe<WatchedScalarWhereInput[] | WatchedScalarWhereInput>;
+  OR?: Maybe<WatchedScalarWhereInput[] | WatchedScalarWhereInput>;
+  NOT?: Maybe<WatchedScalarWhereInput[] | WatchedScalarWhereInput>;
+}
+
+export interface WatchedUpdateManyWithWhereNestedInput {
+  where: WatchedScalarWhereInput;
+  data: WatchedUpdateManyDataInput;
+}
+
+export interface WatchedUpdateManyDataInput {
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
+  favorite?: Maybe<Boolean>;
+  comment?: Maybe<String>;
+}
+
+export interface UserUpsertWithoutScheduleInput {
+  update: UserUpdateWithoutScheduleDataInput;
+  create: UserCreateWithoutScheduleInput;
+}
+
+export interface ScheduleUpdateManyMutationInput {
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
 }
 
 export interface UserCreateInput {
@@ -185,18 +733,259 @@ export interface UserCreateInput {
   name: String;
   email: String;
   password: String;
+  schedule?: Maybe<ScheduleCreateManyWithoutUserInput>;
+  watched?: Maybe<WatchedCreateManyWithoutUserInput>;
+}
+
+export interface ScheduleCreateManyWithoutUserInput {
+  create?: Maybe<
+    ScheduleCreateWithoutUserInput[] | ScheduleCreateWithoutUserInput
+  >;
+  connect?: Maybe<ScheduleWhereUniqueInput[] | ScheduleWhereUniqueInput>;
+}
+
+export interface ScheduleCreateWithoutUserInput {
+  id?: Maybe<ID_Input>;
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
 }
 
 export interface UserUpdateInput {
   name?: Maybe<String>;
   email?: Maybe<String>;
   password?: Maybe<String>;
+  schedule?: Maybe<ScheduleUpdateManyWithoutUserInput>;
+  watched?: Maybe<WatchedUpdateManyWithoutUserInput>;
+}
+
+export interface ScheduleUpdateManyWithoutUserInput {
+  create?: Maybe<
+    ScheduleCreateWithoutUserInput[] | ScheduleCreateWithoutUserInput
+  >;
+  delete?: Maybe<ScheduleWhereUniqueInput[] | ScheduleWhereUniqueInput>;
+  connect?: Maybe<ScheduleWhereUniqueInput[] | ScheduleWhereUniqueInput>;
+  set?: Maybe<ScheduleWhereUniqueInput[] | ScheduleWhereUniqueInput>;
+  disconnect?: Maybe<ScheduleWhereUniqueInput[] | ScheduleWhereUniqueInput>;
+  update?: Maybe<
+    | ScheduleUpdateWithWhereUniqueWithoutUserInput[]
+    | ScheduleUpdateWithWhereUniqueWithoutUserInput
+  >;
+  upsert?: Maybe<
+    | ScheduleUpsertWithWhereUniqueWithoutUserInput[]
+    | ScheduleUpsertWithWhereUniqueWithoutUserInput
+  >;
+  deleteMany?: Maybe<ScheduleScalarWhereInput[] | ScheduleScalarWhereInput>;
+  updateMany?: Maybe<
+    | ScheduleUpdateManyWithWhereNestedInput[]
+    | ScheduleUpdateManyWithWhereNestedInput
+  >;
+}
+
+export interface ScheduleUpdateWithWhereUniqueWithoutUserInput {
+  where: ScheduleWhereUniqueInput;
+  data: ScheduleUpdateWithoutUserDataInput;
+}
+
+export interface ScheduleUpdateWithoutUserDataInput {
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
+}
+
+export interface ScheduleUpsertWithWhereUniqueWithoutUserInput {
+  where: ScheduleWhereUniqueInput;
+  update: ScheduleUpdateWithoutUserDataInput;
+  create: ScheduleCreateWithoutUserInput;
+}
+
+export interface ScheduleScalarWhereInput {
+  id?: Maybe<ID_Input>;
+  id_not?: Maybe<ID_Input>;
+  id_in?: Maybe<ID_Input[] | ID_Input>;
+  id_not_in?: Maybe<ID_Input[] | ID_Input>;
+  id_lt?: Maybe<ID_Input>;
+  id_lte?: Maybe<ID_Input>;
+  id_gt?: Maybe<ID_Input>;
+  id_gte?: Maybe<ID_Input>;
+  id_contains?: Maybe<ID_Input>;
+  id_not_contains?: Maybe<ID_Input>;
+  id_starts_with?: Maybe<ID_Input>;
+  id_not_starts_with?: Maybe<ID_Input>;
+  id_ends_with?: Maybe<ID_Input>;
+  id_not_ends_with?: Maybe<ID_Input>;
+  name?: Maybe<String>;
+  name_not?: Maybe<String>;
+  name_in?: Maybe<String[] | String>;
+  name_not_in?: Maybe<String[] | String>;
+  name_lt?: Maybe<String>;
+  name_lte?: Maybe<String>;
+  name_gt?: Maybe<String>;
+  name_gte?: Maybe<String>;
+  name_contains?: Maybe<String>;
+  name_not_contains?: Maybe<String>;
+  name_starts_with?: Maybe<String>;
+  name_not_starts_with?: Maybe<String>;
+  name_ends_with?: Maybe<String>;
+  name_not_ends_with?: Maybe<String>;
+  summary?: Maybe<String>;
+  summary_not?: Maybe<String>;
+  summary_in?: Maybe<String[] | String>;
+  summary_not_in?: Maybe<String[] | String>;
+  summary_lt?: Maybe<String>;
+  summary_lte?: Maybe<String>;
+  summary_gt?: Maybe<String>;
+  summary_gte?: Maybe<String>;
+  summary_contains?: Maybe<String>;
+  summary_not_contains?: Maybe<String>;
+  summary_starts_with?: Maybe<String>;
+  summary_not_starts_with?: Maybe<String>;
+  summary_ends_with?: Maybe<String>;
+  summary_not_ends_with?: Maybe<String>;
+  url?: Maybe<String>;
+  url_not?: Maybe<String>;
+  url_in?: Maybe<String[] | String>;
+  url_not_in?: Maybe<String[] | String>;
+  url_lt?: Maybe<String>;
+  url_lte?: Maybe<String>;
+  url_gt?: Maybe<String>;
+  url_gte?: Maybe<String>;
+  url_contains?: Maybe<String>;
+  url_not_contains?: Maybe<String>;
+  url_starts_with?: Maybe<String>;
+  url_not_starts_with?: Maybe<String>;
+  url_ends_with?: Maybe<String>;
+  url_not_ends_with?: Maybe<String>;
+  image?: Maybe<String>;
+  image_not?: Maybe<String>;
+  image_in?: Maybe<String[] | String>;
+  image_not_in?: Maybe<String[] | String>;
+  image_lt?: Maybe<String>;
+  image_lte?: Maybe<String>;
+  image_gt?: Maybe<String>;
+  image_gte?: Maybe<String>;
+  image_contains?: Maybe<String>;
+  image_not_contains?: Maybe<String>;
+  image_starts_with?: Maybe<String>;
+  image_not_starts_with?: Maybe<String>;
+  image_ends_with?: Maybe<String>;
+  image_not_ends_with?: Maybe<String>;
+  rating?: Maybe<Float>;
+  rating_not?: Maybe<Float>;
+  rating_in?: Maybe<Float[] | Float>;
+  rating_not_in?: Maybe<Float[] | Float>;
+  rating_lt?: Maybe<Float>;
+  rating_lte?: Maybe<Float>;
+  rating_gt?: Maybe<Float>;
+  rating_gte?: Maybe<Float>;
+  AND?: Maybe<ScheduleScalarWhereInput[] | ScheduleScalarWhereInput>;
+  OR?: Maybe<ScheduleScalarWhereInput[] | ScheduleScalarWhereInput>;
+  NOT?: Maybe<ScheduleScalarWhereInput[] | ScheduleScalarWhereInput>;
+}
+
+export interface ScheduleUpdateManyWithWhereNestedInput {
+  where: ScheduleScalarWhereInput;
+  data: ScheduleUpdateManyDataInput;
+}
+
+export interface ScheduleUpdateManyDataInput {
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
 }
 
 export interface UserUpdateManyMutationInput {
   name?: Maybe<String>;
   email?: Maybe<String>;
   password?: Maybe<String>;
+}
+
+export interface WatchedCreateInput {
+  id?: Maybe<ID_Input>;
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
+  user?: Maybe<UserCreateOneWithoutWatchedInput>;
+  favorite?: Maybe<Boolean>;
+  comment?: Maybe<String>;
+}
+
+export interface UserCreateOneWithoutWatchedInput {
+  create?: Maybe<UserCreateWithoutWatchedInput>;
+  connect?: Maybe<UserWhereUniqueInput>;
+}
+
+export interface UserCreateWithoutWatchedInput {
+  id?: Maybe<ID_Input>;
+  name: String;
+  email: String;
+  password: String;
+  schedule?: Maybe<ScheduleCreateManyWithoutUserInput>;
+}
+
+export interface WatchedUpdateInput {
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
+  user?: Maybe<UserUpdateOneWithoutWatchedInput>;
+  favorite?: Maybe<Boolean>;
+  comment?: Maybe<String>;
+}
+
+export interface UserUpdateOneWithoutWatchedInput {
+  create?: Maybe<UserCreateWithoutWatchedInput>;
+  update?: Maybe<UserUpdateWithoutWatchedDataInput>;
+  upsert?: Maybe<UserUpsertWithoutWatchedInput>;
+  delete?: Maybe<Boolean>;
+  disconnect?: Maybe<Boolean>;
+  connect?: Maybe<UserWhereUniqueInput>;
+}
+
+export interface UserUpdateWithoutWatchedDataInput {
+  name?: Maybe<String>;
+  email?: Maybe<String>;
+  password?: Maybe<String>;
+  schedule?: Maybe<ScheduleUpdateManyWithoutUserInput>;
+}
+
+export interface UserUpsertWithoutWatchedInput {
+  update: UserUpdateWithoutWatchedDataInput;
+  create: UserCreateWithoutWatchedInput;
+}
+
+export interface WatchedUpdateManyMutationInput {
+  name?: Maybe<String>;
+  summary?: Maybe<String>;
+  url?: Maybe<String>;
+  image?: Maybe<String>;
+  rating?: Maybe<Float>;
+  favorite?: Maybe<Boolean>;
+  comment?: Maybe<String>;
+}
+
+export interface ScheduleSubscriptionWhereInput {
+  mutation_in?: Maybe<MutationType[] | MutationType>;
+  updatedFields_contains?: Maybe<String>;
+  updatedFields_contains_every?: Maybe<String[] | String>;
+  updatedFields_contains_some?: Maybe<String[] | String>;
+  node?: Maybe<ScheduleWhereInput>;
+  AND?: Maybe<
+    ScheduleSubscriptionWhereInput[] | ScheduleSubscriptionWhereInput
+  >;
+  OR?: Maybe<ScheduleSubscriptionWhereInput[] | ScheduleSubscriptionWhereInput>;
+  NOT?: Maybe<
+    ScheduleSubscriptionWhereInput[] | ScheduleSubscriptionWhereInput
+  >;
 }
 
 export interface UserSubscriptionWhereInput {
@@ -210,8 +999,62 @@ export interface UserSubscriptionWhereInput {
   NOT?: Maybe<UserSubscriptionWhereInput[] | UserSubscriptionWhereInput>;
 }
 
+export interface WatchedSubscriptionWhereInput {
+  mutation_in?: Maybe<MutationType[] | MutationType>;
+  updatedFields_contains?: Maybe<String>;
+  updatedFields_contains_every?: Maybe<String[] | String>;
+  updatedFields_contains_some?: Maybe<String[] | String>;
+  node?: Maybe<WatchedWhereInput>;
+  AND?: Maybe<WatchedSubscriptionWhereInput[] | WatchedSubscriptionWhereInput>;
+  OR?: Maybe<WatchedSubscriptionWhereInput[] | WatchedSubscriptionWhereInput>;
+  NOT?: Maybe<WatchedSubscriptionWhereInput[] | WatchedSubscriptionWhereInput>;
+}
+
 export interface NodeNode {
   id: ID_Output;
+}
+
+export interface Schedule {
+  id: ID_Output;
+  name?: String;
+  summary?: String;
+  url?: String;
+  image?: String;
+  rating?: Float;
+}
+
+export interface SchedulePromise extends Promise<Schedule>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  name: () => Promise<String>;
+  summary: () => Promise<String>;
+  url: () => Promise<String>;
+  image: () => Promise<String>;
+  rating: () => Promise<Float>;
+  user: <T = UserPromise>() => T;
+}
+
+export interface ScheduleSubscription
+  extends Promise<AsyncIterator<Schedule>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  name: () => Promise<AsyncIterator<String>>;
+  summary: () => Promise<AsyncIterator<String>>;
+  url: () => Promise<AsyncIterator<String>>;
+  image: () => Promise<AsyncIterator<String>>;
+  rating: () => Promise<AsyncIterator<Float>>;
+  user: <T = UserSubscription>() => T;
+}
+
+export interface ScheduleNullablePromise
+  extends Promise<Schedule | null>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  name: () => Promise<String>;
+  summary: () => Promise<String>;
+  url: () => Promise<String>;
+  image: () => Promise<String>;
+  rating: () => Promise<Float>;
+  user: <T = UserPromise>() => T;
 }
 
 export interface User {
@@ -226,6 +1069,24 @@ export interface UserPromise extends Promise<User>, Fragmentable {
   name: () => Promise<String>;
   email: () => Promise<String>;
   password: () => Promise<String>;
+  schedule: <T = FragmentableArray<Schedule>>(args?: {
+    where?: ScheduleWhereInput;
+    orderBy?: ScheduleOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => T;
+  watched: <T = FragmentableArray<Watched>>(args?: {
+    where?: WatchedWhereInput;
+    orderBy?: WatchedOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => T;
 }
 
 export interface UserSubscription
@@ -235,6 +1096,24 @@ export interface UserSubscription
   name: () => Promise<AsyncIterator<String>>;
   email: () => Promise<AsyncIterator<String>>;
   password: () => Promise<AsyncIterator<String>>;
+  schedule: <T = Promise<AsyncIterator<ScheduleSubscription>>>(args?: {
+    where?: ScheduleWhereInput;
+    orderBy?: ScheduleOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => T;
+  watched: <T = Promise<AsyncIterator<WatchedSubscription>>>(args?: {
+    where?: WatchedWhereInput;
+    orderBy?: WatchedOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => T;
 }
 
 export interface UserNullablePromise
@@ -244,27 +1123,96 @@ export interface UserNullablePromise
   name: () => Promise<String>;
   email: () => Promise<String>;
   password: () => Promise<String>;
+  schedule: <T = FragmentableArray<Schedule>>(args?: {
+    where?: ScheduleWhereInput;
+    orderBy?: ScheduleOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => T;
+  watched: <T = FragmentableArray<Watched>>(args?: {
+    where?: WatchedWhereInput;
+    orderBy?: WatchedOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => T;
 }
 
-export interface UserConnection {
+export interface Watched {
+  id: ID_Output;
+  name?: String;
+  summary?: String;
+  url?: String;
+  image?: String;
+  rating?: Float;
+  favorite?: Boolean;
+  comment?: String;
+}
+
+export interface WatchedPromise extends Promise<Watched>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  name: () => Promise<String>;
+  summary: () => Promise<String>;
+  url: () => Promise<String>;
+  image: () => Promise<String>;
+  rating: () => Promise<Float>;
+  user: <T = UserPromise>() => T;
+  favorite: () => Promise<Boolean>;
+  comment: () => Promise<String>;
+}
+
+export interface WatchedSubscription
+  extends Promise<AsyncIterator<Watched>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  name: () => Promise<AsyncIterator<String>>;
+  summary: () => Promise<AsyncIterator<String>>;
+  url: () => Promise<AsyncIterator<String>>;
+  image: () => Promise<AsyncIterator<String>>;
+  rating: () => Promise<AsyncIterator<Float>>;
+  user: <T = UserSubscription>() => T;
+  favorite: () => Promise<AsyncIterator<Boolean>>;
+  comment: () => Promise<AsyncIterator<String>>;
+}
+
+export interface WatchedNullablePromise
+  extends Promise<Watched | null>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  name: () => Promise<String>;
+  summary: () => Promise<String>;
+  url: () => Promise<String>;
+  image: () => Promise<String>;
+  rating: () => Promise<Float>;
+  user: <T = UserPromise>() => T;
+  favorite: () => Promise<Boolean>;
+  comment: () => Promise<String>;
+}
+
+export interface ScheduleConnection {
   pageInfo: PageInfo;
-  edges: UserEdge[];
+  edges: ScheduleEdge[];
 }
 
-export interface UserConnectionPromise
-  extends Promise<UserConnection>,
+export interface ScheduleConnectionPromise
+  extends Promise<ScheduleConnection>,
     Fragmentable {
   pageInfo: <T = PageInfoPromise>() => T;
-  edges: <T = FragmentableArray<UserEdge>>() => T;
-  aggregate: <T = AggregateUserPromise>() => T;
+  edges: <T = FragmentableArray<ScheduleEdge>>() => T;
+  aggregate: <T = AggregateSchedulePromise>() => T;
 }
 
-export interface UserConnectionSubscription
-  extends Promise<AsyncIterator<UserConnection>>,
+export interface ScheduleConnectionSubscription
+  extends Promise<AsyncIterator<ScheduleConnection>>,
     Fragmentable {
   pageInfo: <T = PageInfoSubscription>() => T;
-  edges: <T = Promise<AsyncIterator<UserEdgeSubscription>>>() => T;
-  aggregate: <T = AggregateUserSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<ScheduleEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateScheduleSubscription>() => T;
 }
 
 export interface PageInfo {
@@ -288,6 +1236,62 @@ export interface PageInfoSubscription
   hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
   startCursor: () => Promise<AsyncIterator<String>>;
   endCursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface ScheduleEdge {
+  node: Schedule;
+  cursor: String;
+}
+
+export interface ScheduleEdgePromise
+  extends Promise<ScheduleEdge>,
+    Fragmentable {
+  node: <T = SchedulePromise>() => T;
+  cursor: () => Promise<String>;
+}
+
+export interface ScheduleEdgeSubscription
+  extends Promise<AsyncIterator<ScheduleEdge>>,
+    Fragmentable {
+  node: <T = ScheduleSubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface AggregateSchedule {
+  count: Int;
+}
+
+export interface AggregateSchedulePromise
+  extends Promise<AggregateSchedule>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateScheduleSubscription
+  extends Promise<AsyncIterator<AggregateSchedule>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface UserConnection {
+  pageInfo: PageInfo;
+  edges: UserEdge[];
+}
+
+export interface UserConnectionPromise
+  extends Promise<UserConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<UserEdge>>() => T;
+  aggregate: <T = AggregateUserPromise>() => T;
+}
+
+export interface UserConnectionSubscription
+  extends Promise<AsyncIterator<UserConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<UserEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateUserSubscription>() => T;
 }
 
 export interface UserEdge {
@@ -323,6 +1327,60 @@ export interface AggregateUserSubscription
   count: () => Promise<AsyncIterator<Int>>;
 }
 
+export interface WatchedConnection {
+  pageInfo: PageInfo;
+  edges: WatchedEdge[];
+}
+
+export interface WatchedConnectionPromise
+  extends Promise<WatchedConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<WatchedEdge>>() => T;
+  aggregate: <T = AggregateWatchedPromise>() => T;
+}
+
+export interface WatchedConnectionSubscription
+  extends Promise<AsyncIterator<WatchedConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<WatchedEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateWatchedSubscription>() => T;
+}
+
+export interface WatchedEdge {
+  node: Watched;
+  cursor: String;
+}
+
+export interface WatchedEdgePromise extends Promise<WatchedEdge>, Fragmentable {
+  node: <T = WatchedPromise>() => T;
+  cursor: () => Promise<String>;
+}
+
+export interface WatchedEdgeSubscription
+  extends Promise<AsyncIterator<WatchedEdge>>,
+    Fragmentable {
+  node: <T = WatchedSubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface AggregateWatched {
+  count: Int;
+}
+
+export interface AggregateWatchedPromise
+  extends Promise<AggregateWatched>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateWatchedSubscription
+  extends Promise<AsyncIterator<AggregateWatched>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
 export interface BatchPayload {
   count: Long;
 }
@@ -337,6 +1395,62 @@ export interface BatchPayloadSubscription
   extends Promise<AsyncIterator<BatchPayload>>,
     Fragmentable {
   count: () => Promise<AsyncIterator<Long>>;
+}
+
+export interface ScheduleSubscriptionPayload {
+  mutation: MutationType;
+  node: Schedule;
+  updatedFields: String[];
+  previousValues: SchedulePreviousValues;
+}
+
+export interface ScheduleSubscriptionPayloadPromise
+  extends Promise<ScheduleSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = SchedulePromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = SchedulePreviousValuesPromise>() => T;
+}
+
+export interface ScheduleSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<ScheduleSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = ScheduleSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = SchedulePreviousValuesSubscription>() => T;
+}
+
+export interface SchedulePreviousValues {
+  id: ID_Output;
+  name?: String;
+  summary?: String;
+  url?: String;
+  image?: String;
+  rating?: Float;
+}
+
+export interface SchedulePreviousValuesPromise
+  extends Promise<SchedulePreviousValues>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  name: () => Promise<String>;
+  summary: () => Promise<String>;
+  url: () => Promise<String>;
+  image: () => Promise<String>;
+  rating: () => Promise<Float>;
+}
+
+export interface SchedulePreviousValuesSubscription
+  extends Promise<AsyncIterator<SchedulePreviousValues>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  name: () => Promise<AsyncIterator<String>>;
+  summary: () => Promise<AsyncIterator<String>>;
+  url: () => Promise<AsyncIterator<String>>;
+  image: () => Promise<AsyncIterator<String>>;
+  rating: () => Promise<AsyncIterator<Float>>;
 }
 
 export interface UserSubscriptionPayload {
@@ -389,6 +1503,68 @@ export interface UserPreviousValuesSubscription
   password: () => Promise<AsyncIterator<String>>;
 }
 
+export interface WatchedSubscriptionPayload {
+  mutation: MutationType;
+  node: Watched;
+  updatedFields: String[];
+  previousValues: WatchedPreviousValues;
+}
+
+export interface WatchedSubscriptionPayloadPromise
+  extends Promise<WatchedSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = WatchedPromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = WatchedPreviousValuesPromise>() => T;
+}
+
+export interface WatchedSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<WatchedSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = WatchedSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = WatchedPreviousValuesSubscription>() => T;
+}
+
+export interface WatchedPreviousValues {
+  id: ID_Output;
+  name?: String;
+  summary?: String;
+  url?: String;
+  image?: String;
+  rating?: Float;
+  favorite?: Boolean;
+  comment?: String;
+}
+
+export interface WatchedPreviousValuesPromise
+  extends Promise<WatchedPreviousValues>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  name: () => Promise<String>;
+  summary: () => Promise<String>;
+  url: () => Promise<String>;
+  image: () => Promise<String>;
+  rating: () => Promise<Float>;
+  favorite: () => Promise<Boolean>;
+  comment: () => Promise<String>;
+}
+
+export interface WatchedPreviousValuesSubscription
+  extends Promise<AsyncIterator<WatchedPreviousValues>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  name: () => Promise<AsyncIterator<String>>;
+  summary: () => Promise<AsyncIterator<String>>;
+  url: () => Promise<AsyncIterator<String>>;
+  image: () => Promise<AsyncIterator<String>>;
+  rating: () => Promise<AsyncIterator<Float>>;
+  favorite: () => Promise<AsyncIterator<Boolean>>;
+  comment: () => Promise<AsyncIterator<String>>;
+}
+
 /*
 The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `"4"`) or integer (such as `4`) input value will be accepted as an ID.
 */
@@ -401,14 +1577,19 @@ The `String` scalar type represents textual data, represented as UTF-8 character
 export type String = string;
 
 /*
-The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.
+The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).
 */
-export type Int = number;
+export type Float = number;
 
 /*
 The `Boolean` scalar type represents `true` or `false`.
 */
 export type Boolean = boolean;
+
+/*
+The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.
+*/
+export type Int = number;
 
 export type Long = string;
 
@@ -419,8 +1600,16 @@ export type Long = string;
 export const models: Model[] = [
   {
     name: "User",
-    embedded: false
-  }
+    embedded: false,
+  },
+  {
+    name: "Schedule",
+    embedded: false,
+  },
+  {
+    name: "Watched",
+    embedded: false,
+  },
 ];
 
 /**

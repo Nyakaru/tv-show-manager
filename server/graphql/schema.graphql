@@ -1,20 +1,108 @@
 type User {
-    id: ID!
-    name: String!
-    email: String!
+  id: ID!
+  name: String!
+  email: String!
+  schedule: [Schedule]
+  watched: [Watched]
 }
 
 type AuthPayload {
-    token: String
-    user: User
+  token: String
+  user: User
+}
+
+type Show {
+  name: String
+  summary: String
+  url: String
+  image: String
+  rating: Float
+}
+
+type Schedule {
+  id: ID!
+  name: String
+  summary: String
+  url: String
+  image: String
+  rating: Float
+  user: User
+}
+
+type Watched {
+  id: ID!
+  name: String
+  summary: String
+  url: String
+  image: String
+  rating: Float
+  user: User
+  favorite: Boolean
+  comment: String
+}
+
+type UpdateMutationsMessage {
+  message: String
+}
+
+input WatchedCreateInput {
+  name: String
+  summary: String
+  url: String
+  image: String
+  rating: Float
+  user: UserCreateOneWithoutWatchedInput
+  favorite: Boolean
+  comment: String
+}
+
+input ScheduleCreateInput {
+  id: ID
+  name: String
+  summary: String
+  url: String
+  image: String
+  rating: Float
+  user: UserCreateOneWithoutScheduleInput
+}
+
+input WatchedUpdateInput {
+  favorite: Boolean
+  comment: String
+}
+
+input WatchedWhereUniqueInput {
+  id: ID
+}
+
+input UserCreateOneWithoutScheduleInput {
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutWatchedInput {
+  connect: UserWhereUniqueInput
+}
+
+input UserWhereUniqueInput {
+  id: ID
+  email: String
 }
 
 type Query {
-  info: String!
-  users: [User]
+  shows(pageSize: Int, after: String): [Show]
+  schedule: [Schedule]
+  watchList: [Watched]
+  favorite: [Watched]
+  showSearch(pageSize: Int, after: String, query: String): [Show]
 }
 
 type Mutation {
-    signup(email: String!, password:String!, name: String!): AuthPayload
-    login(email: String!, password: String!): AuthPayload
+  signup(email: String!, password: String!, name: String!): AuthPayload
+  login(email: String!, password: String!): AuthPayload
+  schedule(input: ScheduleCreateInput): Schedule
+  watched(input: WatchedCreateInput): Watched
+  updateWatchStatus(
+    data: WatchedUpdateInput!
+    where: WatchedWhereUniqueInput
+  ): Watched
 }
