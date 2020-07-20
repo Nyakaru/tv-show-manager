@@ -27,9 +27,13 @@ const favorite = async (_, _args, context, _info) => {
   }
 
   let shows = await context.prisma.user({ email: email }).watched();
-  let userShows = shows.filter((user) => {
-    user.favorite == true;
-  });
+  let userShows = []
+  
+  shows.map( item => {
+    if (item.favorite == true) {
+      userShows.push(item)
+    }
+  })
 
   return userShows;
 };

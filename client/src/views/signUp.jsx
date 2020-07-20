@@ -1,6 +1,13 @@
 //@ts-check
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { Spinner } from "react-bootstrap";
+import { useMutation } from "react-apollo";
+import {
+  useErrorHandler,
+  ErrorMessageContainer,
+} from "../components/helpers/errorHandler";
+import { signUpMutation } from "../server/mutations/users";
 
 import "../components/helpers/login.scss";
 
@@ -10,6 +17,41 @@ function SignUp() {
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { error, showError } = useErrorHandler(null);
+  // @ts-ignore
+  const history = useHistory();
+
+  const [authMutation] = useMutation(signUpMutation, {
+    errorPolicy: "none",
+    fetchPolicy: "no-cache",
+  });
+  const authHandler = async () => {
+    
+    try {
+      setLoading(true);
+      const { data } = await authMutation({
+  variables: { name: userName, email: userEmail, password: userPassword },
+      });
+      const { token } = data?.signup;
+      window.localStorage.setItem('token', token)
+        history.push("/shows");
+
+    } catch (err) {
+      console.log(err, "err");
+      setLoading(false);
+      // throw an error message, user does not exist, or wrong password
+      showError("Authentication failed!");
+    }
+  };
+
+  /**
+   * @param {{ preventDefault: () => void; }} e
+   */
+  const onSubmit = (e) => {
+    e.preventDefault();
+    authHandler();
+  };
 
   const renderSpinner = () => {
     return (
@@ -25,7 +67,7 @@ function SignUp() {
   };
 
   return (
-    <div>
+    <div style={{ marginTop: "150px" }}>
       <div className="auth-inner">
         <form>
           <h3>Sign Up</h3>
@@ -67,13 +109,17 @@ function SignUp() {
           </div>
           <br />
           <div>
-            <button
-              type="button"
-              disabled={loading}
-              className="btn btn-block submit-button"
-            >
-              {loading ? renderSpinner() : "Sign Up"}
-            </button>
+          <button
+            type="button"
+            disabled={loading}
+            className="btn btn-block submit-button"
+            onClick={onSubmit}
+          >
+            {loading ? renderSpinner() : "Sign Up"}
+          </button>
+          <br />
+          <br />
+          {error && <ErrorMessageContainer errorMessage={error} />}
           </div>
           <br />
         </form>
