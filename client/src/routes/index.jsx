@@ -1,5 +1,8 @@
 import Fulllayout from "../layouts/index.jsx";
-
-var indexRoutes = [{ path: "/", name: "Starter", component: Fulllayout }];
+import SignUp from "../views/signUp"
+var indexRoutes = [{ path: "/", name: "Starter", component: Fulllayout,
+ }, {path: "/", name: "Starter", component: SignUp,
+},
+];
 
 export default indexRoutes;

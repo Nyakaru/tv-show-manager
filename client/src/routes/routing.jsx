@@ -2,8 +2,6 @@ import Shows from "../views/shows";
 import Watched from "../views/watched";
 import Schedule from "../views/schedule";
 import Favorite from "../views/favorite";
-import Login from "../views/login";
-import SignUp from "../views/signUp";
 
 var ThemeRoutes = [
   {
@@ -31,22 +29,11 @@ var ThemeRoutes = [
     component: Favorite,
   },
   {
-    path: "/login",
-    name: "Login",
-    icon: "mdi mdi-credit-card-multiple",
-    component: Login,
-  },
-  {
-    path: "/signup",
-    name: "SignUp",
-    icon: "mdi mdi-credit-card-multiple",
-    component: SignUp,
-  },
-  {
-    path: "/",
+    path: "/shows",
     pathTo: "/shows",
     name: "Dashboard",
     redirect: true,
   },
 ];
+
 export default ThemeRoutes;

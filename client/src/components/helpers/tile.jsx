@@ -1,5 +1,5 @@
 //@ts-check
-import React, { useState } from "react";
+import React from "react";
 import {
   Card,
   CardImg,
@@ -8,12 +8,6 @@ import {
   CardTitle,
   CardSubtitle,
   Button,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Form,
-  Input,
 } from "reactstrap";
 
 const cardStyle = {
@@ -34,43 +28,6 @@ const buttonStyle = {
   backgroundColor: "white",
 };
 
-/**
- * @param {React.ReactNode} buttonLabel
- */
-const ModalExample = (buttonLabel) => {
-  const [modal, setModal] = useState(false);
-
-  const toggle = () => setModal(!modal);
-
-  return (
-    <>
-      <Form inline onSubmit={(e) => e.preventDefault()}>
-        {" "}
-        <Button color="secondary" onClick={toggle}>
-          {buttonLabel}
-        </Button>
-      </Form>
-      <Modal isOpen={modal} toggle={toggle}>
-        <ModalHeader toggle={toggle}>Add Comment</ModalHeader>
-        <ModalBody>
-          <Input
-            type="textarea"
-            placeholder="Write something about the TV show"
-            rows={5}
-          />
-        </ModalBody>
-        <ModalFooter>
-          <Button color="primary" onClick={toggle}>
-            Submit
-          </Button>{" "}
-          <Button color="secondary" onClick={toggle}>
-            Cancel
-          </Button>
-        </ModalFooter>
-      </Modal>
-    </>
-  );
-};
 
 /**
  * @param {React.ReactNode} name
@@ -78,7 +35,8 @@ const ModalExample = (buttonLabel) => {
  * @param {React.ReactNode} summary
  * @param {string} image
  */
-export const HomeCardRender = (name, rating, summary, image) => {
+export const HomeCardRender = (name, rating, summary, image, scheduler, watcher) => {
+  const data = { name, rating, summary, image }
   return (
     <Card style={cardStyle}>
       <CardImg style={imgStyle} src={image} />
@@ -86,8 +44,8 @@ export const HomeCardRender = (name, rating, summary, image) => {
         <CardTitle>{name}</CardTitle>
         <CardSubtitle> Rating - {rating}</CardSubtitle>
         <CardText>{summary}</CardText>
-        <Button>Add to watched</Button>
-        <Button style={buttonStyle}>Add to schedule</Button>
+        <Button onClick={ () => watcher(data)}>Add to watched</Button>
+        <Button style={buttonStyle} onClick={ () => scheduler(data)}>Add to schedule</Button>
       </CardBody>
     </Card>
   );
@@ -104,11 +62,12 @@ export const WatchedCardRender = (
   rating,
   summary,
   image,
-  buttonLabel
+  Favoriter,
+  id
 ) => {
-  const [modal, setModal] = useState(false);
 
-  const toggle = () => setModal(!modal);
+  const data = { name, rating, summary, image, id }
+
   return (
     <Card style={cardStyle}>
       <CardImg style={imgStyle} src={image} />
@@ -116,8 +75,7 @@ export const WatchedCardRender = (
         <CardTitle>{name}</CardTitle>
         <CardSubtitle> Rating - {rating}</CardSubtitle>
         <CardText>{summary}</CardText>
-        <Button style={buttonStyle}> Favorite</Button>
-        {ModalExample(buttonLabel)}
+        <Button onClick={ () => Favoriter(data)}> Add to Favorites</Button>
       </CardBody>
     </Card>
   );
@@ -129,7 +87,8 @@ export const WatchedCardRender = (
  * @param {React.ReactNode} summary
  * @param {string} image
  */
-export const ScheduledCardRender = (name, rating, summary, image) => {
+export const ScheduledCardRender = (name, rating, summary, image, watcher) => {
+  const data = { name, rating, summary, image }
   return (
     <Card style={cardStyle}>
       <CardImg style={imgStyle} src={image} />
@@ -137,7 +96,7 @@ export const ScheduledCardRender = (name, rating, summary, image) => {
         <CardTitle>{name}</CardTitle>
         <CardSubtitle> Rating - {rating}</CardSubtitle>
         <CardText>{summary}</CardText>
-        <Button>Add to watched</Button>
+        <Button onClick={ () => watcher(data)}>Add to watched</Button>
       </CardBody>
     </Card>
   );
@@ -156,9 +115,6 @@ export const FavoriteCardRender = (
   image,
   buttonLabel
 ) => {
-  const [modal, setModal] = useState(false);
-
-  const toggle = () => setModal(!modal);
   return (
     <Card style={cardStyle}>
       <CardImg style={imgStyle} src={image} />
@@ -166,7 +122,6 @@ export const FavoriteCardRender = (
         <CardTitle>{name}</CardTitle>
         <CardSubtitle> Rating - {rating}</CardSubtitle>
         <CardText>{summary}</CardText>
-        {ModalExample(buttonLabel)}
       </CardBody>
     </Card>
   );
