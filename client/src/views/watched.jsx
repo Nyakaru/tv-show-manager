@@ -1,65 +1,73 @@
 //@ts-check
 import React from "react";
+import { useQuery, useMutation } from "react-apollo";
 
+import { watchQuery } from "../server/queries/shows"
+import { updateWatchStatus } from "../server/mutations/shows"
 import { WatchedCardRender } from "../components/helpers/tile";
+import { toastNotification } from "../components/helpers/toast"
+
 import "../components/helpers/card.scss";
 
-let array1 = [
-  {
-    name: "Girls",
-    rating: 6.7,
-    image:
-      "http://static.tvmaze.com/uploads/images/original_untouched/31/78286.jpg",
-    summary:
-      "This Emmy winning series is a comic look at the assorted humiliations and rare triumphs of a group of girls in their 20s.</p>",
-  },
-  {
-    name: "Girls",
-    rating: 6.7,
-    image:
-      "http://static.tvmaze.com/uploads/images/original_untouched/31/78286.jpg",
-    summary:
-      "This Emmy winning series is a comic look at the assorted humiliations and rare triumphs of a group of girls in their 20s.</p>",
-  },
-  {
-    name: "Girls",
-    rating: 6.7,
-    image:
-      "http://static.tvmaze.com/uploads/images/original_untouched/31/78286.jpg",
-    summary:
-      "This Emmy winning series is a comic look at the assorted humiliations and rare triumphs of a group of girls in their 20s.</p>",
-  },
-  {
-    name: "Girls",
-    rating: 6.7,
-    image:
-      "http://static.tvmaze.com/uploads/images/original_untouched/31/78286.jpg",
-    summary:
-      "This Emmy winning series is a comic look at the assorted humiliations and rare triumphs of a group of girls in their 20s.</p>",
-  },
-  {
-    name: "Girls",
-    rating: 6.7,
-    image:
-      "http://static.tvmaze.com/uploads/images/original_untouched/31/78286.jpg",
-    summary:
-      "This Emmy winning series is a comic look at the assorted humiliations and rare triumphs of a group of girls in their 20s.</p>",
-  },
-];
 const Watched = () => {
-  return (
-    <div className="form-container">
-      {array1.map((item) => {
-        return WatchedCardRender(
-          item.name,
-          item.rating,
-          item.summary,
-          item.image,
-          "Comment"
-        );
-      })}
-    </div>
-  );
+  const [watchAddMutation] = useMutation(updateWatchStatus, {
+    errorPolicy: "none",
+    fetchPolicy: "no-cache",
+  });
+  const watchHandler = async (props) => {
+    const { id } = props;
+
+    try {
+      const { data } = await watchAddMutation({
+        variables: {
+          id: id,
+          data: {  favorite: true },
+        },
+      });
+      if ( data ) {
+        toastNotification('success', `Successfully added to favorite shows`);
+      }
+      else {
+        toastNotification('success', `An error occured`);
+      }
+    } catch (err) {
+      console.log(err, "err");
+    }
+  };
+  const { loading, data, error } = useQuery( watchQuery );
+  if ( !data ) {
+    return (
+      <div>
+        Loading.......
+      </div>
+    )
+  }
+
+  let allData = data?.watchList || ['']
+  if (allData.length > 0) {
+    return (
+      <div className="form-container">
+        {allData.map((item) => {
+          return WatchedCardRender(
+            item.name,
+            item.rating,
+            item.summary,
+            item.image,
+            watchHandler,
+            item.id
+          );
+        })}
+      </div>
+    )
+  }
+  else {
+    return (
+      <div>
+        No watched shows currently
+      </div>
+    )
+  }
+  ;
 };
 
 export default Watched;

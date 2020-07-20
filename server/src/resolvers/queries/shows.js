@@ -8,13 +8,17 @@ import { pagination, BASE_URL } from "../../utils";
 const shows = async (_, { pageSize, after }) => {
   let shows = await fetch(`${BASE_URL}/shows?page=1`).then((res) => res.json());
 
-  let results = shows.map((item) => ({
+  let results = shows.map((item) => {
+    let summar = item?.summary.split('<p>').join('').split('<b>').join('').split('</b>').join('').split('</p>').join('')
+
+    return {
     name: item?.name,
-    summary: item?.summary,
+    summary: summar,
     url: item?.url,
     image: item?.image?.original,
     rating: item?.rating?.average,
-  }));
+  }
+  });
 
   let show = pagination({ after, pageSize, results: results });
 
