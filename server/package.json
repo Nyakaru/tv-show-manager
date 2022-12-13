@@ -16,7 +16,7 @@
     "apollo-boost": "^0.4.9",
     "apollo-server-express": "^2.16.0",
     "bcryptjs": "^2.4.3",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "graphql-middleware": "^4.0.2",
     "graphql-tools": "^6.0.14",
     "jsonwebtoken": "^8.5.1",
